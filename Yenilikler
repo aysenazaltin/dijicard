@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diji-Card PRO | Gelişmiş Dijital Kimlik</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* CSS Değişkenleri (Karanlık/Aydınlık Mod için) */
+        :root {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --shadow: rgba(0,0,0,0.5);
+            --border: #334155;
+            --input-bg: #0f172a;
+        }
+
+        /* Aydınlık Tema Değişkenleri */
+        .light-mode {
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent: #0284c7;
+            --shadow: rgba(0,0,0,0.1);
+            --border: #e2e8f0;
+            --input-bg: #f8fafc;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Tema Değiştirme Butonu */
+        #themeToggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.3s;
+            z-index: 100;
+        }
+        #themeToggle:hover { background: var(--accent); color: white; }
+
+        .main-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            width: 100%;
+            max-width: 900px;
+            margin-top: 50px;
+        }
+
+        @media (max-width: 768px) { .main-wrapper { grid-template-columns: 1fr; } }
+
+        /* FORM BÖLÜMÜ (Sol) */
+        .form-section {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        h2 { color: var(--accent); font-weight: 700; margin-top: 0; }
+        .form-group { margin-bottom: 15px; }
+        label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text-main);
+            margin-top: 5px;
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); outline: none; }
+        
+        button.action-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        button.action-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--shadow); }
+
+        /* KART ÖNİZLEME BÖLÜMÜ (Sağ) */
+        .preview-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* PDF Olacak Kartın Tasarımı */
+        #profileCard {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px var(--shadow);
+            border-left: 6px solid var(--accent);
+            width: 100%;
+            max-width: 320px;
+            text-align: left;
+            position: relative;
+            border: 1px solid var(--border);
+        }
+
+        #profileCard h3 { margin: 0; font-size: 22px; color: var(--accent); }
+        #profileCard .p-job { margin: 3px 0 15px 0; font-size: 14px; color: var(--text-muted); font-weight: 600; }
+        #profileCard hr { border: 0; border-top: 1px solid var(--border); margin: 15px 0; }
+        .info-item { font-size: 13px; color: var(--text-main); margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .info-item i { color: var(--accent); width: 16px; }
+
+        /* Sosyal Medya İkonları */
+        .social-icons { margin-top: 20px; display: flex; gap: 15px; justify-content: center; font-size: 18px; }
+        .social-icons a { color: var(--text-muted); transition: 0.3s; }
+        .social-icons a:hover { color: var(--accent); transform: scale(1.2); }
+
+        /* QR KOD VE SONUÇ */
+        #resultArea { display: none; text-align: center; margin-top: 20px; }
+        #qrImg { background: white; padding: 10px; border-radius: 15px; box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); }
+
+    </style>
+</head>
+<body>
+
+    <button id="themeToggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+
+    <div class="main-wrapper">
+        <div class="form-section">
+            <h2><i class="fas fa-user-plus mr-2"></i>Bilgilerini Gir</h2>
+            
+            <div class="form-group">
+                <label>Ad Soyad</label>
+                <input type="text" id="name" placeholder="Ayşenaz Altın" onkeyup="updatePreview()">
+            </div>
+            
+            <div class="form-group">
+                <label>Meslek</label>
+                <input type="text" id="job" placeholder="Elektronik Mühendisi" onkeyup="updatePreview()">
+            </div>
+
+            <div class="form-group">
+                <label>Telefon</label>
+                <input type="tel" id="phone" placeholder="05XX XXX XX XX" onkeyup="updatePreview()">
+            </div>
+
+            <div class="form-group">
+                <label>E-posta</label>
+                <input type="email" id="email" placeholder="mail@ornek.com" onkeyup="updatePreview()">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fab fa-linkedin"></i> LinkedIn Profili</label>
+                <input type="text" id="linkedin" placeholder="https://linkedin.com/in/aysenaz" onkeyup="updatePreview()">
+            </div>
+
+            <button class="action-btn" onclick="generateQR()"><i class="fas fa-qrcode"></i> vCard QR OLUŞTUR</button>
+        </div>
+
+        <div class="preview-section">
+            
+            <div id="profileCard">
+                <h3 id="pName">Ayşenaz Altın</h3>
+                <p class="p-job" id="pJob">Elektronik Mühendisi</p>
+                <hr>
+                <div class="info-item"><i class="fas fa-phone"></i> <span id="pPhone">05XX XXX XX XX</span></div>
+                <div class="info-item"><i class="fas fa-envelope"></i> <span id="pMail">mail@ornek.com</span></div>
+                
+                <div class="social-icons">
+                    <a href="#" id="pLinkedin"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+
+            <button class="action-btn" style="background:#10b981;" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> KARTVİZİTİ PDF İNDİR</button>
+
+            <div id="resultArea">
+                <h4>Rehber Kartınız</h4>
+                <div id="qrPlaceholder"></div>
+                <p style="font-size:11px; color:var(--text-muted);">Okutunca rehbere ekleme ekranı açılır.</p>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // 1. CANLI ÖNİZLEME FONKSİYONU
+    function updatePreview() {
+        document.getElementById("pName").innerText = document.getElementById("name").value || "Ayşenaz Altın";
+        document.getElementById("pJob").innerText = document.getElementById("job").value || "Elektronik Mühendisi";
+        document.getElementById("pPhone").innerText = document.getElementById("phone").value || "05XX XXX XX XX";
+        document.getElementById("pMail").innerText = document.getElementById("email").value || "mail@ornek.com";
+        
+        // LinkedIn Linkini Güncelle
+        const linkedinUrl = document.getElementById("linkedin").value;
+        const pLinkedin = document.getElementById("pLinkedin");
+        pLinkedin.href = linkedinUrl ? linkedinUrl : "#";
+    }
+
+    // 2. vCard QR KOD OLUŞTURMA
+    function generateQR() {
+        const name = document.getElementById("name").value;
+        const job = document.getElementById("job").value;
+        const phone = document.getElementById("phone").value;
+        const email = document.getElementById("email").value;
+        const linkedin = document.getElementById("linkedin").value;
+
+        if(!name || !job || !phone) { alert("Lütfen temel alanları doldurun!"); return; }
+
+        // Profesyonel vCard Formatı (LinkedIn linki dahil)
+        const vCard = `BEGIN:VCARD
+VERSION:3.0
+FN:${name}
+TITLE:${job}
+TEL:${phone}
+EMAIL:${email}
+URL:${linkedin}
+END:VCARD`;
+
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(vCard)}`;
+        
+        document.getElementById("qrPlaceholder").innerHTML = `<img src="${qrUrl}" id="qrImg" alt="QR Kod">`;
+        document.getElementById("resultArea").style.display = "block";
+    }
+
+    // 3. PDF İNDİRME FONKSİYONU
+    function downloadPDF() {
+        const element = document.getElementById('profileCard');
+        const opt = {
+            margin:       10,
+            filename:     'Aysenaz_Altin_Kartvizit.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        // html2pdf kütüphanesini kullanıyoruz
+        html2pdf().from(element).set(opt).save();
+    }
+
+    // 4. KARANLIK / AYDINLIK TEMA TEMSİLCİSİ
+    function toggleTheme() {
+        const body = document.body;
+        const icon = document.querySelector('#themeToggle i');
+        
+        body.classList.toggle('light-mode');
+        
+        if(body.classList.contains('light-mode')) {
+            icon.classList.replace('fa-moon', 'fa-sun');
+        } else {
+            icon.classList.replace('fa-sun', 'fa-moon');
+        }
+    }
+</script>
+
+</body>
+</html>
